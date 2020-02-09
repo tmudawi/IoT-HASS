@@ -2,9 +2,9 @@ Program Description:
 ===
 
 This application is used to protect the smart home IoT environment. It consists basically of three engines. The
-system works in two different modes of operations: The Inline mode where the system is installed inline with
+system works in two different modes of operation: The Inline mode where the system is installed inline with
 the traffic in a device such as a Raspberry Pi or a Router. In this mode, the system works as an intrusion 
-prevention system (IPS) where it detects and blocks thrats and alerts the user at the same time. The other mode 
+prevention system (IPS) where it detects and blocks threats and alerts the user at the same time. The other mode 
 is a Passive mode where the system is not installed inline with the traffic and thus can work as an intrusion 
 detection system (IDS) and can only detects attacks and alerts the user. The user can receive alerts via a GUI
 interface. The GUI also allows the user to view, verify and delete/block suspect devices.

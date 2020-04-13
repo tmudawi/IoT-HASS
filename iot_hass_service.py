@@ -84,6 +84,8 @@ def main():
     print("Validating Connected IoT Devices!")
     DM.dm_engine()
     
+    DM.block_all_ips()
+    
     # Importing the dataset
     dataset = pd.read_csv('/home/pi/Software/IoT-HASS/CICIDS2017_Sample.csv')
 

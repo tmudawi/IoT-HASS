@@ -85,3 +85,39 @@ class DM_Engine:
             return len(host_bytes) == 4 and len(valid) == 4
         except:
             return False
+            
+    # Function that tries to block all IP addresses by default
+    # if successful it mark environment as Inline otherwise it
+    # mark it as passive.
+    def block_all_ips():
+        
+        conn = sqlite3.connect('IoT_Hass.db')
+        c = conn.cursor()
+
+        c.execute('select * from Home_IoT_Devices')
+        
+        c2 = conn.cursor()
+        
+        c2.execute('CREATE TABLE IF NOT EXISTS Home_IoT_Environment(Environment TEXT)')
+
+        rows = c.fetchall()
+
+        for row in rows:
+            device_ip = str(row[0])
+		    # Try to block all IP addresses
+            if not os.system("echo $MY_SUDO_PASS | sudo -S iptables -A INPUT -s " + device_ip + " -j DROP"):
+                c2.execute('UPDATE Home_IoT_Environment SET Environment = ? WHERE Environment != ?', ('Passive','Passive'))
+                conn.commit()
+            else:
+                c2.execute('UPDATE Home_IoT_Environment SET Environment = ? WHERE Environment != ?', ('Inline','Inline'))
+                conn.commit()
+
+        c.close()
+        c2.close()
+        conn.close()
+        
+
+
+            
+        
+        

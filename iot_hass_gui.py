@@ -57,9 +57,9 @@ def show_last_privacy_leak_datetime():
 	conn.close()
 
 # function to block suspect devices
-def delete_device():
+def block_device():
 	if(e_device_ip.get() == ""):
-		MessageBox.showinfo("Block Status", "Device IP is required for Deletion")
+		MessageBox.showinfo("Block Status", "Device IP is required for Blocking")
 	else:
 		# Delete the device from the Sqlite3 table
 		conn = sqlite3.connect('IoT_Hass.db')
@@ -73,9 +73,24 @@ def delete_device():
 
 		e_device_ip.delete(0, 'end')
 		show_devices()
-		MessageBox.showinfo("Delete Status", "Deleted Successfully")
+		MessageBox.showinfo("Block Status", "Blocked Successfully")
 		c.close()
 		conn.close()
+		
+# function to unblock a device
+def unblock_device():
+	if(e_device_ip.get() == ""):
+		MessageBox.showinfo("Unlock Status", "Device IP is required for Unblocking")
+	else:   
+        # Unlock the source IP of the device
+		os.system("echo $MY_SUDO_PASS | sudo -S iptables -D INPUT -s " + e_device_ip.get() + " -j DROP")
+    
+
+		e_device_ip.delete(0, 'end')
+		show_devices()
+		MessageBox.showinfo("Unblock Status", "Unblocked Successfully")
+		#c.close()
+		#conn.close()
 
 # function to show the user all active connected IoT devices 
 def show_devices():
@@ -94,6 +109,51 @@ def show_devices():
 	conn.commit()
 	c.close()
 	conn.close()
+
+# Function to verify IoT-HASS environment
+def check_env():
+	
+    curr_env = ''
+	
+    conn = sqlite3.connect('IoT_Hass.db')
+    
+    c = conn.cursor()
+    
+    c.execute('select environment from Home_IoT_Environment')
+    
+    rows = c.fetchall()
+
+    for row in rows:
+        curr_env = str(row[0])
+    
+    conn.commit()
+    c.close()
+    conn.close()
+    
+    if curr_env == 'Passive':
+        ids_engine = Label(root, text='Inline mode', font=('bold', 10))
+        ids_engine.place(x=700, y=10);
+		# label for deleting/blocking suspect device
+        device_ip = Label(root, text='Device IP', font=('bold', 9))
+        device_ip.place(x=50, y=510)
+        
+		# textbox for entering the device IP we like to delete
+        e_device_ip = Entry()
+        e_device_ip.place(x=130, y=505)
+
+        # button to click to delete/block the device IP
+        btn_device_ip = Button(root, text='Block Device', font=("italic", 9), bg="white", command=block_device)
+        btn_device_ip.place(x=330, y=505)
+
+        # button to click to unblock the device IP
+        btn_device_ip = Button(root, text='Unblock Device', font=("italic", 9), bg="white", command=unblock_device)
+        btn_device_ip.place(x=450, y=505)
+    else:
+        ids_engine = Label(root, text='Passive mode', font=('bold', 10))
+        ids_engine.place(x=700, y=10);
+		# label for deleting/blocking suspect device
+        device_disconnect = Label(root, text='Note: Please physically disconnect a suspicious device to remove it entirely from the home network', font=('bold', 9))
+        device_disconnect.place(x=50, y=500);
 
 # title for intrusion detection alerts
 ids_engine = Label(root, text='Intrusion Detection Alerts', font=('bold', 12))
@@ -115,22 +175,6 @@ listbox3.place(x=50, y=130, width=600, height=35)
 iam_engine = Label(root, text='IoT Device Manager', font=('bold', 12))
 iam_engine.place(x=270, y=200);
 
-# label for deleting/blocking suspect device
-device_ip = Label(root, text='Device IP', font=('bold', 9))
-device_ip.place(x=50, y=510);
-
-# textbox for entering the device IP we like to delete
-e_device_ip = Entry()
-e_device_ip.place(x=130, y=505)
-
-# button to click to delete/block the device IP
-btn_device_ip = Button(root, text='Delete Device', font=("italic", 9), bg="white", command=delete_device)
-btn_device_ip.place(x=330, y=505)
-
-# label for deleting/blocking suspect device
-device_disconnect = Label(root, text='Note: After deleting disconnect device physically to remove it entirely from home network', font=('bold', 9))
-device_disconnect.place(x=50, y=535);
-
 list = Listbox(root)
 list.place(x=50, y=230, width=600, height=250)
 
@@ -139,5 +183,7 @@ show_last_intrusion_datetime()
 show_last_privacy_leak_datetime()
 
 show_devices()
+
+check_env()
 
 root.mainloop()
